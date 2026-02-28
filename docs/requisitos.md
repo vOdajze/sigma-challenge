@@ -1,8 +1,8 @@
 <div align="center">
 
-## Documento de Requisitos — Desafio Sigma
+## Especificação de Requisitos de Software — Desafio Sigma
 
-**Versão:** 1.1 · **Data:** 28 de fevereiro de 2026 · **Status:** Ativo
+**Versão:** 1.2 · **Data:** 28 de fevereiro de 2026 · **Status:** Ativo
 
 </div>
 
@@ -10,35 +10,64 @@
 
 ### 1. Introdução
 
-Este documento registra os requisitos do **Desafio Sigma**, uma aplicação full-stack que integra gerenciamento de produtos, controle de fluxo de caixa, infraestrutura containerizada e análise geoespacial (GIS).
+Este documento registra os requisitos de software do **Desafio Sigma**, uma aplicação full-stack que integra gerenciamento de produtos, controle de fluxo de caixa, infraestrutura containerizada e análise geoespacial (GIS).
 
-O projeto está estruturado em quatro partes complementares: (1) Arquitetura Back-End, (2) Infraestrutura com Docker, (3) Funcionalidades GIS e (4) Testes com Postman.
-
-As estórias estão organizadas por módulo funcional e seguem a estrutura:
+O projeto está estruturado em quatro partes complementares: (1) Arquitetura Back-End com Python, (2) Infraestrutura com Docker, (3) Funcionalidades GIS com dados georreferenciados e (4) Testes e documentação com Postman. Os requisitos estão descritos no formato de estórias de usuário, organizadas por módulo funcional, e seguem a estrutura:
 
 > Como `<papel de usuário>` eu quero `<descrição da necessidade>` a fim de `<objetivo do usuário>`.
 
+Cada estória possui condições de satisfação objetivas e verificáveis, que definem os critérios mínimos para que a funcionalidade seja considerada completamente implementada.
+
 ---
 
-### 2. Diretrizes
+### 2. Classes de Usuários
 
-#### Diretriz 1 - Sobre a estrutura
+O sistema contempla três classes de usuários com perfis e responsabilidades distintas:
 
-Todas as estórias seguem a estrutura padrão com papel de usuário, descrição da necessidade e objetivo. Os papéis de usuário neste projeto são: **Usuário Autenticado** (com JWT), **Usuário da API** (consumidor direto dos endpoints) e **Usuário da Interface** (consumidor do frontend web).
+**Usuário da API**
+Desenvolvedor ou sistema externo que consome diretamente os endpoints REST da aplicação. Possui conhecimento técnico para formular requisições HTTP, interpretar responses JSON e lidar com códigos de status. Não há restrições de acesso por padrão — caso JWT seja implementado, passa a depender de autenticação prévia para acessar rotas protegidas.
 
-#### Diretriz 2 - Sobre a identificação
+**Usuário da Interface**
+Usuário final que interage com a aplicação por meio do frontend web (React). Não precisa conhecer os detalhes da API subjacente. Realiza operações como cadastrar produtos, registrar movimentações de caixa e explorar dados geoespaciais por meio de formulários e mapas interativos.
 
-Cada estória possui um identificador único no formato `SIGMA-XXX`, com numeração sequencial por módulo.
 
-#### Diretriz 3 - Sobre prioridades
+---
+
+### 3. Definição de Conceitos
+
+Nesta seção são descritos os principais conceitos do domínio do sistema.
+
+**Produto** — Entidade central do sistema, composta por nome, descrição e preço. Representa um item gerenciável no inventário da aplicação.
+
+**Fluxo de Caixa** — Registro de movimentações financeiras associadas a produtos, com controle de entradas e saídas de estoque e valores. Permite calcular o saldo consolidado do sistema.
+
+**Movimentação** — Evento de entrada ou saída de um produto no fluxo de caixa. Contém quantidade, valor unitário, valor total calculado e tipo (`entrada` ou `saida`).
+
+**GeoJSON** — Formato de arquivo baseado em JSON para representação de geometrias geográficas (polígonos, pontos, linhas). Neste projeto, contém as geometrias de uso do solo com a propriedade `desc_uso_solo`.
+
+**Uso do Solo** — Classificação geoespacial de uma área geográfica, representada pela propriedade `desc_uso_solo` nas features do GeoJSON fornecido.
+
+**Ponto Georreferenciado** — Registro composto por latitude, longitude e uso do solo associado. O sistema identifica automaticamente o uso do solo com base na geometria que contém o ponto.
+
+**JWT (JSON Web Token)** — Padrão de autenticação stateless baseado em tokens assinados. Utilizado para proteger rotas da API sem necessidade de sessões no servidor.
+
+**Docker / Docker Compose** — Ferramentas de containerização e orquestração. Permitem empacotar e executar os serviços da aplicação (backend, frontend, banco de dados) de forma isolada e reproduzível em qualquer ambiente.
+
+**CRUD** — Conjunto de quatro operações básicas sobre dados: Create (criar), Read (ler), Update (atualizar) e Delete (deletar).
+
+---
+
+### 4. Requisitos de Software
+
+#### 4.1. Requisitos Funcionais
+
+Os requisitos funcionais estão descritos no formato de estórias de usuário, organizadas por módulo. As prioridades seguem a tabela abaixo:
 
 | Prioridade | Descrição |
 |---|---|
 | 🔴 Alta | Obrigatório para entrega |
 | 🟡 Média | Importante, mas não bloqueia |
 | 🟢 Baixa | Diferencial avaliativo |
-
-#### Diretriz 4 - Definição de estória implementada
 
 Uma estória é considerada completamente implementada se e somente se:
 
@@ -49,11 +78,7 @@ Uma estória é considerada completamente implementada se e somente se:
 
 ---
 
-### 3. Estórias por Módulo
-
----
-
-#### Módulo 1 — CRUD de Produtos
+##### Módulo 1 — CRUD de Produtos
 
 ---
 
@@ -115,7 +140,7 @@ Como **usuário da API** eu quero **remover um produto do sistema** a fim de **m
 
 ---
 
-#### Módulo 2 — Fluxo de Caixa
+##### Módulo 2 — Fluxo de Caixa
 
 ---
 
@@ -143,13 +168,13 @@ Como **usuário da API** eu quero **visualizar o resumo do fluxo de caixa** a fi
 
 ---
 
-#### Módulo 3 — Autenticação JWT (Diferencial)
+##### Módulo 3 — Autenticação JWT (Diferencial)
 
 ---
 
 **SIGMA-008** · 🟢 Baixa (Diferencial)
 
-Como **usuário do sistema** eu quero **autenticar-me com usuário e senha** a fim de **obter um token JWT para acessar rotas protegidas da API**.
+Como **usuário do sistema** eu quero **autenticar-me com usuário e senha** a fim de **obter acesso seguro às funcionalidades protegidas da aplicação**.
 
 **Condições de satisfação:**
 - `POST /login` aceita `username` e `password` no body;
@@ -161,7 +186,7 @@ Como **usuário do sistema** eu quero **autenticar-me com usuário e senha** a f
 
 ---
 
-#### Módulo 4 — GIS: Usos do Solo
+##### Módulo 4 — GIS: Usos do Solo
 
 ---
 
@@ -190,7 +215,7 @@ Como **usuário da API** eu quero **buscar a área total de um tipo de uso do so
 
 ---
 
-#### Módulo 5 — GIS: Pontos Georreferenciados
+##### Módulo 5 — GIS: Pontos Georreferenciados
 
 ---
 
@@ -218,13 +243,13 @@ Como **usuário da API** eu quero **listar todos os pontos georreferenciados cad
 
 ---
 
-#### Módulo 6 — Infraestrutura
+##### Módulo 6 — Infraestrutura
 
 ---
 
-**SIGMA-013** · 🔴 Alta [EPIC]
+**SIGMA-013** · 🔴 Alta · **[EPIC]**
 
-Como **desenvolvedor** eu quero **executar toda a aplicação com um único comando Docker** a fim de **facilitar a configuração do ambiente e garantir reprodutibilidade**.
+Como **desenvolvedor** eu quero **executar toda a aplicação com um único comando Docker** a fim de **garantir que qualquer pessoa consiga replicar o ambiente sem configurações manuais**.
 
 Sub-estórias: SIGMA-013a, SIGMA-013b, SIGMA-013c, SIGMA-013d
 
@@ -232,7 +257,7 @@ Sub-estórias: SIGMA-013a, SIGMA-013b, SIGMA-013c, SIGMA-013d
 
 **SIGMA-013a** · 🔴 Alta
 
-Como **desenvolvedor** eu quero **containerizar o Back-End com Docker** a fim de **isolar o ambiente de execução da API Python**.
+Como **desenvolvedor** eu quero **containerizar o Back-End com Docker** a fim de **isolar o ambiente de execução da API Python e garantir consistência entre ambientes**.
 
 **Condições de satisfação:**
 - `Dockerfile` na pasta `/backend` instala dependências via `requirements.txt` e inicia o servidor;
@@ -243,7 +268,7 @@ Como **desenvolvedor** eu quero **containerizar o Back-End com Docker** a fim de
 
 **SIGMA-013b** · 🔴 Alta
 
-Como **desenvolvedor** eu quero **containerizar o banco de dados PostgreSQL** a fim de **garantir persistência de dados em ambiente isolado**.
+Como **desenvolvedor** eu quero **containerizar o banco de dados PostgreSQL** a fim de **garantir persistência de dados em ambiente isolado e reproduzível**.
 
 **Condições de satisfação:**
 - Serviço `db` no `docker-compose.yml` usa imagem oficial `postgres:15`;
@@ -258,9 +283,9 @@ Como **desenvolvedor** eu quero **containerizar o Frontend com Docker** a fim de
 
 **Condições de satisfação:**
 - `Dockerfile` na pasta `/frontend` instala dependências via `package.json` e realiza o build da aplicação;
-- Imagem de produção utiliza servidor estático (ex: `nginx`) para servir os arquivos gerados pelo build;
+- Imagem de produção utiliza servidor estático (`nginx`) para servir os arquivos gerados pelo build;
 - Container expõe porta `80` (ou `3000` em modo desenvolvimento);
-- Variável de ambiente `VITE_API_URL` (ou equivalente) configurável via `.env` para apontar para o Back-End;
+- Variável de ambiente `VITE_API_URL` configurável via `.env` para apontar para o Back-End;
 - Arquivo `.env.example` documentado com todas as variáveis necessárias.
 
 ---
@@ -278,15 +303,15 @@ Como **desenvolvedor** eu quero **orquestrar todos os servidores com Docker Comp
 
 ---
 
-#### Módulo 7 — Frontend Web
+##### Módulo 7 — Frontend Web
+
+Stack: **React + TypeScript + Vite + react-leaflet**
 
 ---
 
-**SIGMA-015** · 🔴 Alta [EPIC]
+**SIGMA-015** · 🔴 Alta · **[EPIC]**
 
-Como **usuário da interface** eu quero **acessar uma aplicação web** a fim de **interagir com todas as funcionalidades do sistema de forma visual e intuitiva**.
-
-Stack: **React + TypeScript + Vite + react-leaflet**
+Como **usuário da interface** eu quero **acessar uma aplicação web integrada** a fim de **interagir com todas as funcionalidades do sistema de forma visual e intuitiva**.
 
 Sub-estórias: SIGMA-015a, SIGMA-015b, SIGMA-015c, SIGMA-015d, SIGMA-015e
 
@@ -294,7 +319,7 @@ Sub-estórias: SIGMA-015a, SIGMA-015b, SIGMA-015c, SIGMA-015d, SIGMA-015e
 
 **SIGMA-015a** · 🔴 Alta
 
-Como **usuário da interface** eu quero **gerenciar produtos por meio de uma tela dedicada** a fim de **gerenciar o inventário de forma ágil e com feedback visual imediato**.
+Como **usuário da interface** eu quero **gerenciar produtos por meio de uma tela dedicada** a fim de **manter o inventário atualizado de forma ágil e com feedback visual imediato**.
 
 **Condições de satisfação:**
 - Tela lista todos os produtos em formato de tabela ou cards com `nome`, `descricao` e `preco`;
@@ -307,7 +332,7 @@ Como **usuário da interface** eu quero **gerenciar produtos por meio de uma tel
 
 **SIGMA-015b** · 🔴 Alta
 
-Como **usuário da interface** eu quero **visualizar e registrar movimentações no fluxo de caixa** a fim de **acompanhar entradas e saídas de produtos de forma clara**.
+Como **usuário da interface** eu quero **visualizar e registrar movimentações no fluxo de caixa** a fim de **acompanhar a saúde financeira do inventário em tempo real**.
 
 **Condições de satisfação:**
 - Tela exibe o resumo do caixa com total de entradas, saídas e saldo atual;
@@ -319,20 +344,20 @@ Como **usuário da interface** eu quero **visualizar e registrar movimentações
 
 **SIGMA-015c** · 🔴 Alta
 
-Como **usuário da interface** eu quero **visualizar os polígonos de uso do solo em um mapa interativo** a fim de **explorar geograficamente os dados do GeoJSON**.
+Como **usuário da interface** eu quero **visualizar os polígonos de uso do solo em um mapa interativo** a fim de **explorar geograficamente os dados do GeoJSON de forma clara e navegável**.
 
 **Condições de satisfação:**
 - Mapa renderizado com `react-leaflet` exibindo os polígonos do GeoJSON fornecido;
 - Cada polígono é colorido de acordo com seu `desc_uso_solo`;
-- Ao clicar em um polígono, exibe popup com `desc_uso_solo` e área total (consumindo `SIGMA-010`);
+- Ao clicar em um polígono, exibe popup com `desc_uso_solo` e área total (consumindo SIGMA-010);
 - Mapa possui controles de zoom e navegação;
-- Painel lateral lista todos os tipos de uso do solo disponíveis (consumindo `SIGMA-009`).
+- Painel lateral lista todos os tipos de uso do solo disponíveis (consumindo SIGMA-009).
 
 ---
 
 **SIGMA-015d** · 🔴 Alta
 
-Como **usuário da interface** eu quero **registrar pontos georreferenciados clicando diretamente no mapa** a fim de **cadastrar localidades de forma intuitiva sem precisar digitar coordenadas manualmente**.
+Como **usuário da interface** eu quero **registrar pontos georreferenciados clicando diretamente no mapa** a fim de **cadastrar localidades de forma rápida e precisa**.
 
 **Condições de satisfação:**
 - Ao clicar no mapa, as coordenadas (`latitude`, `longitude`) são capturadas automaticamente;
@@ -345,7 +370,7 @@ Como **usuário da interface** eu quero **registrar pontos georreferenciados cli
 
 **SIGMA-015e** · 🟢 Baixa (Diferencial)
 
-Como **usuário da interface** eu quero **autenticar-me por meio de uma tela de login** a fim de **acessar o sistema de forma segura quando JWT estiver habilitado**.
+Como **usuário da interface** eu quero **autenticar-me por meio de uma tela de login** a fim de **acessar o sistema de forma segura quando a autenticação JWT estiver habilitada**.
 
 **Condições de satisfação:**
 - Tela de login com campos `username` e `password`;
@@ -356,13 +381,13 @@ Como **usuário da interface** eu quero **autenticar-me por meio de uma tela de 
 
 ---
 
-#### Módulo 8 — Testes e Documentação com Postman (Diferencial)
+##### Módulo 8 — Testes e Documentação com Postman (Diferencial)
 
 ---
 
 **SIGMA-014** · 🟢 Baixa (Diferencial)
 
-Como **avaliador técnico** eu quero **importar uma Collection Postman completa** a fim de **testar todos os endpoints da API sem configuração manual**.
+Como **avaliador técnico** eu quero **importar uma Collection Postman completa** a fim de **validar todos os endpoints da API de forma organizada e sem configuração manual**.
 
 **Condições de satisfação:**
 - Arquivo `postman_collection.json` exportado e salvo na pasta `/postman` do repositório;
@@ -370,7 +395,7 @@ Como **avaliador técnico** eu quero **importar uma Collection Postman completa*
 - Variáveis globais configuradas: `{{base_url}}`, `{{token}}` e `{{produto_id}}`;
 - Script de autenticação salva token automaticamente no ambiente após `POST /login`;
 - `postman_environment.json` incluído (opcional);
-- `README.md` contém instruções de importação e sequência de execução sugerida.
+- `README.md` contém instruções de importação e a sequência de execução abaixo.
 
 **Sequência de execução sugerida:**
 
@@ -391,7 +416,43 @@ Como **avaliador técnico** eu quero **importar uma Collection Postman completa*
 
 ---
 
-### 4. Backlog Consolidado
+#### 4.2. Requisitos Não-Funcionais
+
+**RNF-001 — Tempo de resposta**
+O sistema deve responder a requisições de leitura simples (listagens e buscas por ID) em tempo inferior a 500ms em condições normais de operação.
+
+**RNF-002 — Persistência de dados**
+O sistema deve garantir que nenhum dado seja perdido em caso de reinicialização dos containers, utilizando volumes Docker persistentes para o banco de dados PostgreSQL.
+
+**RNF-003 — Reprodutibilidade de ambiente**
+O sistema deve poder ser iniciado completamente em qualquer máquina com Docker e Docker Compose instalados, executando apenas o comando `docker-compose up --build`, sem configurações manuais adicionais além das variáveis de ambiente documentadas no `.env.example`.
+
+**RNF-004 — Segurança de entrada**
+O sistema deve validar e sanitizar todas as entradas de usuário em todos os endpoints, retornando mensagens de erro descritivas e status HTTP adequados para entradas inválidas.
+
+**RNF-005 — Segurança de autenticação**
+O sistema deve armazenar senhas de usuários utilizando algoritmo de hash seguro (bcrypt ou equivalente) e nunca expor senhas em plaintext em responses ou logs.
+
+**RNF-006 — Resiliência**
+O sistema deve reiniciar automaticamente os containers em caso de falha, e o serviço de backend deve aguardar a disponibilidade do banco de dados antes de inicializar (healthcheck + retry).
+
+**RNF-007 — Integração frontend-backend**
+O sistema deve permitir que o frontend consuma a API sem erros de CORS, com a configuração de headers adequada no backend para o domínio do servidor frontend.
+
+**RNF-008 — Rastreabilidade de dados GIS**
+O sistema deve calcular a área de uso do solo utilizando projeção geográfica adequada (coordenadas métricas), garantindo precisão mínima de 2 casas decimais no resultado.
+
+**RNF-009 — Versionamento**
+O código-fonte do sistema deve ser versionado em repositório Git público, com histórico de commits semânticos que reflitam a evolução do desenvolvimento.
+
+**RNF-010 — Documentação**
+O sistema deve conter um `README.md` na raiz do repositório com instruções completas para instalação, configuração de variáveis de ambiente e inicialização em modo desenvolvimento.
+
+---
+
+### 5. Rastreabilidade de Requisitos
+
+A tabela abaixo registra todos os requisitos funcionais do sistema com seus identificadores, módulos e prioridades, servindo como referência para rastreabilidade entre estórias, implementação e testes.
 
 | ID | Estória | Módulo | Prioridade |
 |---|---|---|---|
@@ -417,10 +478,15 @@ Como **avaliador técnico** eu quero **importar uma Collection Postman completa*
 | SIGMA-015d | Registro de pontos via clique no mapa | Frontend | 🔴 Alta |
 | SIGMA-015e | Tela de login com JWT | Frontend | 🟢 Baixa |
 | SIGMA-014 | Collection Postman | Testes | 🟢 Baixa |
+| RNF-001 | Tempo de resposta < 500ms | Não-Funcional | 🔴 Alta |
+| RNF-002 | Persistência com volumes Docker | Não-Funcional | 🔴 Alta |
+| RNF-003 | Reprodutibilidade de ambiente | Não-Funcional | 🔴 Alta |
+| RNF-004 | Validação de entradas | Não-Funcional | 🔴 Alta |
+| RNF-005 | Hash de senhas | Não-Funcional | 🟡 Média |
+| RNF-006 | Resiliência dos containers | Não-Funcional | 🔴 Alta |
+| RNF-007 | Configuração de CORS | Não-Funcional | 🔴 Alta |
+| RNF-008 | Precisão de cálculo GIS | Não-Funcional | 🔴 Alta |
+| RNF-009 | Versionamento Git | Não-Funcional | 🔴 Alta |
+| RNF-010 | Documentação README | Não-Funcional | 🔴 Alta |
 
-
-<div align="center">
-
-**Documento versão 1.1** · Criado em 28 de fevereiro de 2026 · Última atualização: 28 de fevereiro de 2026 · Status: Ativo
-
-</div>
+---
