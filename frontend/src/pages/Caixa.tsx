@@ -65,12 +65,17 @@ export default function Caixa() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [produtoValue, setProdutoValue] = useState<string | null>("");
+  const [produtoValue, setProdutoValue] = useState<string | null>(null);
   const [filtro, setFiltro] = useState("");
+  const [comboboxOpen, setComboboxOpen] = useState(false);
 
+  const produtoSelecionado = produtos.find(
+    (p) => String(p.id) === produtoValue,
+  );
   const produtosFiltrados = produtos.filter((p) =>
     p.nome.toLowerCase().includes(filtro.toLowerCase()),
   );
+
   const {
     register,
     handleSubmit,
@@ -90,7 +95,6 @@ export default function Caixa() {
   const fetchCaixa = async () => {
     try {
       const { data } = await api.get("/caixa");
-
       if (data.data && data.movimentacoes) {
         setResumo(data.data);
         setMovimentacoes(data.movimentacoes);
@@ -125,17 +129,21 @@ export default function Caixa() {
 
   const handleOpenDialog = () => {
     reset();
-    setProdutoValue("");
+    setProdutoValue(null);
+    setFiltro("");
+    setComboboxOpen(false);
     setDialogOpen(true);
   };
 
   const onSubmit = async (form: MovimentacaoForm) => {
     try {
-      await api.post("/caixa/movimentacoes", form);
+      await api.post("/caixa/movimentacao", form);
       toast.success("Movimentação registrada");
       setDialogOpen(false);
       reset();
-      setProdutoValue("");
+      setProdutoValue(null);
+      setFiltro("");
+      setComboboxOpen(false);
       fetchCaixa();
     } catch {
       toast.error("Erro ao registrar movimentação");
@@ -305,13 +313,27 @@ export default function Caixa() {
                 value={produtoValue}
                 onValueChange={(val) => {
                   setProdutoValue(val);
-                  setValue("produto_id", val ? Number(val) : 0);
+                  const produto =
+                    val ? produtos.find((p) => String(p.id) === val) : null;
+                  setValue("produto_id", produto?.id ?? 0);
+                  setValue("valor_unitario", produto?.preco ?? 0);
+                  setFiltro("");
+                }}
+                inputValue={
+                  comboboxOpen ? filtro
+                  : produtoSelecionado ?
+                    produtoSelecionado.nome
+                  : filtro
+                }
+                onInputValueChange={(val: string) => setFiltro(val)}
+                onOpenChange={(open) => {
+                  setComboboxOpen(open);
+                  if (open) setFiltro("");
                 }}
               >
                 <ComboboxInput
                   placeholder="Pesquisar produto..."
                   showClear={!!produtoValue}
-                  onChange={(e) => setFiltro(e.target.value)}
                 />
                 <ComboboxContent>
                   <ComboboxList>
@@ -378,6 +400,8 @@ export default function Caixa() {
                   type="number"
                   step="0.01"
                   placeholder="0,00"
+                  readOnly
+                  className="bg-muted cursor-not-allowed"
                   {...register("valor_unitario", { valueAsNumber: true })}
                 />
                 {errors.valor_unitario && (
