@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Ambiente 
+.env
+*.env
+!.env.example
+
+# Keys
+*.pem
+*.key
+
+# Frontend 
+node_modules/
+frontend/dist/
+frontend/.env
+!frontend/.env.example
+
+# BD
+*.sqlite
+*.db
+
+# Testes
+.pytest_cache/
+htmlcov/
+.coverage
+
+# IDEs 
+.vscode/
+.idea/
+*.swp
+
+# OS 
+.DS_Store
+Thumbs.db
