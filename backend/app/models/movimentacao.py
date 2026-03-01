@@ -26,7 +26,7 @@ class MovimentacaoCaixa(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     produto_id: Mapped[int] = mapped_column(ForeignKey("produtos.id", ondelete="RESTRICT"), index=True)
     quantidade: Mapped[int] = mapped_column(Integer)
-    valor_unitario: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    valor_unitario: Mapped[Decimal] = mapped_column(Numeric(10, 2)) 
     valor_total: Mapped[Decimal] = mapped_column(
         Numeric(10, 2),
         Computed("quantidade * valor_unitario", persisted=True),
@@ -36,6 +36,5 @@ class MovimentacaoCaixa(Base):
         index=True,
     )
     data_movimentacao: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     produto: Mapped[Produto] = relationship("Produto", back_populates="movimentacoes")

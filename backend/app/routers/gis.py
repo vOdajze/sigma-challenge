@@ -30,3 +30,7 @@ def criar_ponto(
 @router.get("/pontos", response_model=PontoListResponse)
 def listar_pontos(db: Session = Depends(get_db), _=Depends(get_current_user)):
     return gis_service.listar_pontos(db)
+
+@router.get("/geojson")
+def get_geojson(_=Depends(get_current_user)):
+    return gis_service.get_geojson()

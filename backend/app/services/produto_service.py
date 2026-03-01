@@ -1,7 +1,9 @@
+import math
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.repositories import produto_repository
-from app.schemas.produto import ProdutoCreate, ProdutoUpdate
+from app.schemas.produto import ProdutoCreate, ProdutoUpdate, ProdutoPaginatedResponse
 from app.models.produto import Produto
 
 
@@ -11,8 +13,15 @@ def criar_produto(db: Session, data: ProdutoCreate) -> Produto:
     return produto
 
 
-def listar_produtos(db: Session) -> list[Produto]:
-    return produto_repository.get_all(db)
+def listar_produtos(db: Session, page: int, size: int) -> ProdutoPaginatedResponse:
+    items, total = produto_repository.get_all(db, page=page, size=size)
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "size": size,
+        "pages": math.ceil(total / size) if size else 0,
+    }
 
 
 def buscar_produto(db: Session, produto_id: int) -> Produto:
@@ -31,5 +40,12 @@ def atualizar_produto(db: Session, produto_id: int, data: ProdutoUpdate) -> Prod
 
 def remover_produto(db: Session, produto_id: int) -> None:
     produto = buscar_produto(db, produto_id)
-    produto_repository.delete(db, produto)
-    db.commit()
+    try:
+        produto_repository.delete(db, produto)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Produto possui movimentações e não pode ser removido",
+        )

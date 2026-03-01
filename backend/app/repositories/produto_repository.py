@@ -1,14 +1,18 @@
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.models.produto import Produto
 from app.schemas.produto import ProdutoCreate, ProdutoUpdate
 
 
-def get_all(db: Session) -> list[Produto]:
-    return db.query(Produto).all()
+def get_all(db: Session, page: int = 1, size: int = 20) -> tuple[list[Produto], int]:
+    offset = (page - 1) * size
+    total = db.execute(select(func.count()).select_from(Produto)).scalar_one()
+    items = db.execute(select(Produto).offset(offset).limit(size)).scalars().all()
+    return list(items), total
 
 
 def get_by_id(db: Session, produto_id: int) -> Produto | None:
-    return db.query(Produto).filter(Produto.id == produto_id).first()
+    return db.execute(select(Produto).where(Produto.id == produto_id)).scalar_one_or_none()
 
 
 def create(db: Session, data: ProdutoCreate) -> Produto:

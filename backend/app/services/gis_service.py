@@ -66,3 +66,7 @@ def criar_ponto(db: Session, data: PontoCreate) -> PontoAmostragem:
 def listar_pontos(db: Session) -> dict:
     pontos = gis_repository.get_all(db)
     return {"total": len(pontos), "pontos": pontos}
+    
+def get_geojson() -> dict:
+    import json
+    return json.loads(GEOJSON_PATH.read_text(encoding="utf-8"))
