@@ -35,3 +35,22 @@ export interface CaixaResumo {
   total_saidas: number;
   saldo: number;
 }
+
+export interface PontoResponse {
+  id: string;
+  latitude: number;
+  longitude: number;
+  desc_uso_solo: string;
+  created_at: string;
+}
+
+export interface PontoListResponse {
+  total: number;
+  pontos: PontoResponse[];
+}
+
+export interface UsoSoloArea {
+  desc_uso_solo: string;
+  area_m2: number;
+  area_km2: number;
+}
