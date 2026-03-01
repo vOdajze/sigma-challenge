@@ -144,7 +144,7 @@ export default function Produtos() {
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border px-4">
         <Table>
           <TableHeader>
             <TableRow>
