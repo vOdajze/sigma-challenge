@@ -18,11 +18,12 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-
+    
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:80"]
 
     GEOJSON_PATH: str = "data/uso_ocupacao_teste.geojson"
 
+   
     @property
     def DATABASE_URL(self) -> str:
         return (
