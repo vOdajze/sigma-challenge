@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import api from "@/services/api";
-import type { Produto, PaginatedResponse } from "@/types";
+import type { Produto } from "@/types";
+import { useProdutosPage } from "@/hooks/useProdutoPage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,42 +64,33 @@ const produtoSchema = z.object({
 
 type ProdutoForm = z.infer<typeof produtoSchema>;
 
-interface AdvancedFilters {
-  preco_min: string;
-  preco_max: string;
-  estoque_min: string;
-}
-
-const EMPTY_ADVANCED: AdvancedFilters = {
-  preco_min: "0",
-  preco_max: "",
-  estoque_min: "",
-};
-const PAGE_SIZE = 10;
-
 export default function Produtos() {
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    produtos,
+    loading,
+    page,
+    totalPages,
+    totalItems,
+    popoverOpen,
+    setPopoverOpen,
+    nome,
+    setNome,
+    nomeQuery,
+    draft,
+    setDraft,
+    applied,
+    hasActiveAdvanced,
+    hasAnyFilter,
+    fetchProdutos,
+    applyAdvanced,
+    clearAdvanced,
+    clearAll,
+    PAGE_SIZE,
+  } = useProdutosPage();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [editando, setEditando] = useState<Produto | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [popoverOpen, setPopoverOpen] = useState(false);
-
-  const [nome, setNome] = useState("");
-  const [nomeQuery, setNomeQuery] = useState("");
-
-  const [draft, setDraft] = useState<AdvancedFilters>(EMPTY_ADVANCED);
-  const [applied, setApplied] = useState<AdvancedFilters>(EMPTY_ADVANCED);
-
-  const hasActiveAdvanced =
-    (applied.preco_min !== "" && applied.preco_min !== "0") ||
-    applied.preco_max !== "" ||
-    applied.estoque_min !== "";
-
-  const hasAnyFilter = nomeQuery !== "" || hasActiveAdvanced;
 
   const {
     register,
@@ -106,65 +98,6 @@ export default function Produtos() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ProdutoForm>({ resolver: zodResolver(produtoSchema) });
-
-  const fetchProdutos = async (
-    p = 1,
-    nomeFiltro = nomeQuery,
-    adv: AdvancedFilters = applied,
-  ) => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: String(p),
-        size: String(PAGE_SIZE),
-      });
-      if (nomeFiltro.trim()) params.set("nome", nomeFiltro.trim());
-      if (adv.preco_min && adv.preco_min !== "0")
-        params.set("preco_min", adv.preco_min);
-      if (adv.preco_max) params.set("preco_max", adv.preco_max);
-      if (adv.estoque_min !== "") params.set("estoque_min", adv.estoque_min);
-      const { data } = await api.get<PaginatedResponse<Produto>>(
-        `/produtos?${params}`,
-      );
-      setProdutos(data.items);
-      setTotalPages(data.pages);
-      setTotalItems(data.total);
-      setPage(data.page);
-    } catch {
-      toast.error("Erro ao carregar produtos");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Debounce do nome
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setNomeQuery(nome);
-      fetchProdutos(1, nome, applied);
-    }, 400);
-    return () => clearTimeout(t);
-  }, [nome]);
-
-  const applyAdvanced = () => {
-    setApplied(draft);
-    setPopoverOpen(false);
-    fetchProdutos(1, nomeQuery, draft);
-  };
-
-  const clearAdvanced = () => {
-    setDraft(EMPTY_ADVANCED);
-    setApplied(EMPTY_ADVANCED);
-    fetchProdutos(1, nomeQuery, EMPTY_ADVANCED);
-  };
-
-  const clearAll = () => {
-    setNome("");
-    setNomeQuery("");
-    setDraft(EMPTY_ADVANCED);
-    setApplied(EMPTY_ADVANCED);
-    fetchProdutos(1, "", EMPTY_ADVANCED);
-  };
 
   const openCriar = () => {
     setEditando(null);
@@ -226,10 +159,6 @@ export default function Produtos() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sprout
-            size={22}
-            className="text-green-600"
-          />
           <div>
             <h1 className="text-2xl font-semibold">Produtos & Serviços</h1>
             <p className="text-sm text-muted-foreground">
@@ -245,9 +174,7 @@ export default function Produtos() {
         </Button>
       </div>
 
-      {/* Barra de busca + botão de filtros */}
       <div className="flex gap-2">
-        {/* Input de nome */}
         <div className="relative flex-1 max-w-sm">
           <Search
             size={15}
@@ -269,7 +196,6 @@ export default function Produtos() {
           )}
         </div>
 
-        {/* Botão de filtros avançados */}
         <Popover
           open={popoverOpen}
           onOpenChange={setPopoverOpen}
@@ -281,7 +207,6 @@ export default function Produtos() {
             >
               <SlidersHorizontal size={15} />
               Filtros
-              {/* Indicador de filtros ativos */}
               {hasActiveAdvanced && (
                 <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
                   {
@@ -312,7 +237,6 @@ export default function Produtos() {
                 )}
               </div>
 
-              {/* Faixa de preço */}
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground uppercase tracking-wide">
                   Faixa de preço (R$)
@@ -347,7 +271,6 @@ export default function Produtos() {
                 </div>
               </div>
 
-              {/* Estoque mínimo */}
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground uppercase tracking-wide">
                   Estoque mínimo
@@ -375,7 +298,6 @@ export default function Produtos() {
           </PopoverContent>
         </Popover>
 
-        {/* Limpar tudo */}
         {hasAnyFilter && (
           <Button
             variant="ghost"

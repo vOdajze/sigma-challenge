@@ -114,7 +114,7 @@ export default function Navbar() {
 
               <DropdownMenuItem
                 onClick={handleLogout}
-                className="text-destructive focus:text-destructive gap-2 cursor-pointer"
+                className="text-destructive focus:text-destructive gap-2"
               >
                 <LogOut size={14} />
                 Sair

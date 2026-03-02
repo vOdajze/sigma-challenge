@@ -218,11 +218,10 @@ export default function Mapa() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Map size={22} className="text-emerald-600" />
           <div>
             <h1 className="text-2xl font-semibold">Mapa GIS</h1>
             <p className="text-sm text-muted-foreground">
-              Clique dentro de uma região ou clique no botão no canto direito para registrar um ponto de amostragem.
+              Clique dentro de uma região no mapa para registrar um ponto de amostragem ou clique no botão do lado direito.
             </p>
           </div>
         </div>
