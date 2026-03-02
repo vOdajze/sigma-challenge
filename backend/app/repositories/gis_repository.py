@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.models.ponto_amostragem import PontoAmostragem
 
@@ -11,4 +12,8 @@ def create(db: Session, latitude: float, longitude: float, desc_uso_solo: str) -
 
 
 def get_all(db: Session) -> list[PontoAmostragem]:
-    return db.query(PontoAmostragem).order_by(PontoAmostragem.created_at.desc()).all()
+    return (
+        db.execute(select(PontoAmostragem).order_by(PontoAmostragem.created_at.desc()))
+        .scalars()
+        .all()
+    )

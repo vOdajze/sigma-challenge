@@ -42,16 +42,19 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         campo = str(error["loc"][-1]) if error["loc"] else "campo"
         errors.append({
             "campo": campo,
-            "mensagem": error["msg"].replace("Input should be", "O campo deve ser")
-                                   .replace("Field required", "Campo obrigatório")
-                                   .replace("greater than", "maior que")
-                                   .replace("less than or equal to", "menor ou igual a")
-                                   .replace("greater than or equal to", "maior ou igual a"),
+            "mensagem": error["msg"]
+                .replace("Input should be", "O campo deve ser")
+                .replace("Field required", "Campo obrigatório")
+                .replace("greater than", "maior que")
+                .replace("less than or equal to", "menor ou igual a")
+                .replace("greater than or equal to", "maior ou igual a")
+                .replace("Extra inputs are not permitted", "Campo não permitido"),
         })
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={"detail": errors},
     )
+
 
 
 app.add_middleware(

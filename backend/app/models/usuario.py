@@ -10,6 +10,6 @@ class Usuario(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(100), unique=True, index=True)
-    hashed_password: Mapped[str] = mapped_column(String(255))  
-    email: Mapped[str | None] = mapped_column(String(255), unique=True)
+    hashed_password: Mapped[str] = mapped_column(String(255))
+    email: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
