@@ -1,21 +1,18 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import type { UsuarioResponse } from "@/types";
 
 interface AuthState {
-  token: string | null;
-  login: (token: string) => void;
-  logout: () => void;
-  isAuthenticated: () => boolean;
+  user: UsuarioResponse | null;
+  status: "idle" | "loading" | "done";
+  setUser: (user: UsuarioResponse | null) => void;
+  setStatus: (status: AuthState["status"]) => void;
+  clear: () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      token: null,
-      login: (token) => set({ token }),
-      logout: () => set({ token: null }),
-      isAuthenticated: () => !!get().token,
-    }),
-    { name: "sigma-auth" },
-  ),
-);
+export const useAuthStore = create<AuthState>()((set) => ({
+  user: null,
+  status: "idle",
+  setUser: (user) => set({ user }),
+  setStatus: (status) => set({ status }),
+  clear: () => set({ user: null, status: "done" }),
+}));
