@@ -21,11 +21,18 @@ def criar_produto(data: ProdutoCreate, db: Session = Depends(get_db), _=Depends(
 def listar_produtos(
     page: int = Query(default=1, ge=1),
     size: int = Query(default=20, ge=1, le=100),
+    nome: str | None = Query(default=None),
+    preco_min: float | None = Query(default=None, ge=0),
+    preco_max: float | None = Query(default=None, ge=0),
+    estoque_min: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
     _=Depends(get_current_user),
 ):
-    return produto_service.listar_produtos(db, page=page, size=size)
-
+    return produto_service.listar_produtos(
+        db, page=page, size=size,
+        nome=nome, preco_min=preco_min,
+        preco_max=preco_max, estoque_min=estoque_min,
+    )
 
 @router.get("/{produto_id}", response_model=ProdutoResponse, responses={**_404, **_422})
 def buscar_produto(produto_id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):

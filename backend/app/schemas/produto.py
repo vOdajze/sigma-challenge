@@ -12,10 +12,10 @@ class ProdutoCreate(BaseModel):
 
 
 class ProdutoUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid") 
     nome: str | None = None
     descricao: str | None = None
     preco: Annotated[Money | None, Field(gt=0)] = None
-
 
 class ProdutoResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

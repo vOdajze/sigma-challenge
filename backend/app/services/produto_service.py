@@ -13,8 +13,20 @@ def criar_produto(db: Session, data: ProdutoCreate) -> Produto:
     return produto
 
 
-def listar_produtos(db: Session, page: int, size: int) -> ProdutoPaginatedResponse:
-    items, total = produto_repository.get_all(db, page=page, size=size)
+def listar_produtos(
+    db: Session,
+    page: int,
+    size: int,
+    nome: str | None = None,
+    preco_min: float | None = None,
+    preco_max: float | None = None,
+    estoque_min: int | None = None,
+) -> ProdutoPaginatedResponse:
+    items, total = produto_repository.get_all(
+        db, page=page, size=size,
+        nome=nome, preco_min=preco_min,
+        preco_max=preco_max, estoque_min=estoque_min,
+    )
     return {
         "items": items,
         "total": total,

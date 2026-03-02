@@ -1,3 +1,4 @@
+from datetime import date
 import math
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -47,8 +48,20 @@ def resumo_caixa(db: Session) -> dict:
     }
 
 
-def listar_movimentacoes(db: Session, page: int, size: int) -> MovimentacaoPaginatedResponse:
-    items, total = caixa_repository.get_all(db, page=page, size=size)
+def listar_movimentacoes(
+    db: Session,
+    page: int,
+    size: int,
+    tipo: TipoMovimentacao | None = None,
+    produto_id: int | None = None,
+    data_inicio: date | None = None,
+    data_fim: date | None = None,
+) -> MovimentacaoPaginatedResponse:
+    items, total = caixa_repository.get_all(
+        db, page=page, size=size,
+        tipo=tipo, produto_id=produto_id,
+        data_inicio=data_inicio, data_fim=data_fim,
+    )
     return {
         "items": items,
         "total": total,
