@@ -1,6 +1,11 @@
 import { X, SlidersHorizontal } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import type { Produto } from "@/types";
+import {
+  type PeriodoPreset,
+  PERIODO_LABELS,
+  getDateRangeForPeriodo,
+} from "@/lib/period-presets";
 import { DateRangePicker } from "@/components/shared/DateRangePicker.tsx";
 import { formatBRL, formatDisplayDate } from "@/lib/formatters";
 import { Button } from "@/components/ui/button";
@@ -38,6 +43,8 @@ interface CaixaFiltersProps {
   setDraftFiltro: (v: string) => void;
   draftComboboxOpen: boolean;
   setDraftComboboxOpen: (v: boolean) => void;
+  draftPeriodo: PeriodoPreset;
+  setDraftPeriodo: (v: PeriodoPreset) => void;
   draftDateRange: DateRange | undefined;
   setDraftDateRange: (v: DateRange | undefined) => void;
   draftProdutoSelecionado: Produto | undefined;
@@ -46,6 +53,7 @@ interface CaixaFiltersProps {
   hasActiveFilters: boolean;
   appliedTipo: string;
   appliedProdutoId: string;
+  appliedPeriodo: PeriodoPreset;
   appliedDateRange: DateRange | undefined;
   produtos: Produto[];
   applyFilters: () => void;
@@ -66,6 +74,8 @@ export function CaixaFilters({
   setDraftFiltro,
   draftComboboxOpen,
   setDraftComboboxOpen,
+  draftPeriodo,
+  setDraftPeriodo,
   draftDateRange,
   setDraftDateRange,
   draftProdutoSelecionado,
@@ -74,6 +84,7 @@ export function CaixaFilters({
   hasActiveFilters,
   appliedTipo,
   appliedProdutoId,
+  appliedPeriodo,
   appliedDateRange,
   produtos,
   applyFilters,
@@ -82,6 +93,33 @@ export function CaixaFilters({
   removeProduto,
   removeDates,
 }: CaixaFiltersProps) {
+  const handlePeriodoChange = (v: string) => {
+    const periodo = v as PeriodoPreset;
+    setDraftPeriodo(periodo);
+    if (periodo !== "personalizado") {
+      setDraftDateRange(getDateRangeForPeriodo(periodo));
+    }
+  };
+
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDraftDateRange(range);
+    setDraftPeriodo("personalizado");
+  };
+
+  const dateBadgeLabel = () => {
+    if (!appliedDateRange) return null;
+    if (appliedPeriodo !== "personalizado") {
+      return PERIODO_LABELS[appliedPeriodo];
+    }
+    if (appliedDateRange.from && appliedDateRange.to) {
+      return `${formatDisplayDate(appliedDateRange.from)} → ${formatDisplayDate(appliedDateRange.to)}`;
+    }
+    if (appliedDateRange.from) {
+      return `A partir de ${formatDisplayDate(appliedDateRange.from)}`;
+    }
+    return `Até ${formatDisplayDate(appliedDateRange.to!)}`;
+  };
+
   return (
     <div className="flex flex-wrap gap-2 items-center">
       <Popover
@@ -190,18 +228,39 @@ export function CaixaFilters({
                 <Label className="text-xs text-muted-foreground uppercase tracking-wide">
                   Período
                 </Label>
-                {draftDateRange && (
+                {draftPeriodo !== "este_mes" && (
                   <button
-                    onClick={() => setDraftDateRange(undefined)}
+                    onClick={() => {
+                      setDraftPeriodo("este_mes");
+                      setDraftDateRange(getDateRangeForPeriodo("este_mes"));
+                    }}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Limpar
+                    Resetar
                   </button>
                 )}
               </div>
+              <Select
+                value={draftPeriodo}
+                onValueChange={handlePeriodoChange}
+              >
+                <SelectTrigger className="text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hoje">Hoje</SelectItem>
+                  <SelectItem value="ontem">Ontem</SelectItem>
+                  <SelectItem value="esta_semana">Esta semana</SelectItem>
+                  <SelectItem value="este_mes">Este mês</SelectItem>
+                  <SelectItem value="ultimos_30_dias">
+                    Últimos 30 dias
+                  </SelectItem>
+                  <SelectItem value="personalizado">Personalizado</SelectItem>
+                </SelectContent>
+              </Select>
               <DateRangePicker
                 value={draftDateRange}
-                onChange={setDraftDateRange}
+                onChange={handleDateRangeChange}
               />
             </div>
 
@@ -246,11 +305,7 @@ export function CaixaFilters({
               variant="secondary"
               className="gap-1 pr-1 font-normal"
             >
-              {appliedDateRange.from && appliedDateRange.to ?
-                `${formatDisplayDate(appliedDateRange.from)} → ${formatDisplayDate(appliedDateRange.to)}`
-              : appliedDateRange.from ?
-                `A partir de ${formatDisplayDate(appliedDateRange.from)}`
-              : `Até ${formatDisplayDate(appliedDateRange.to!)}`}
+              {dateBadgeLabel()}
               <button onClick={removeDates}>
                 <X size={11} />
               </button>

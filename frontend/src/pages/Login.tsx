@@ -210,7 +210,7 @@ export default function Login() {
                 <Label htmlFor="identifier">Usuário ou e-mail</Label>
                 <Input
                   id="identifier"
-                  placeholder="seu usuário ou e-mail"
+                  placeholder="Seu usuário ou e-mail"
                   autoComplete="username"
                   {...loginForm.register("identifier")}
                 />
@@ -256,7 +256,7 @@ export default function Login() {
                 <Label htmlFor="reg-username">Usuário</Label>
                 <Input
                   id="reg-username"
-                  placeholder="mínimo 3 caracteres"
+                  placeholder="Mínimo 3 caracteres"
                   autoComplete="username"
                   {...registerForm.register("username")}
                 />

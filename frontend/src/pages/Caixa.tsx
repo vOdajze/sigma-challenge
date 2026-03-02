@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Wallet } from "lucide-react";
 import { useCaixaPage } from "@/hooks/useCaixaPage";
 import { CaixaResumoCards } from "@/components/caixa/CaixaResumoCards";
 import { CaixaFilters } from "@/components/caixa/CaixaFilters";
@@ -15,6 +15,10 @@ export default function Caixa() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
+          <Wallet
+            size={22}
+            className="text-blue-600"
+          />
           <div>
             <h1 className="text-2xl font-semibold">Fluxo de Caixa</h1>
             <p className="text-sm text-muted-foreground">
@@ -31,8 +35,9 @@ export default function Caixa() {
       </div>
 
       <CaixaResumoCards
-        resumo={hook.resumo}
+        resumo={hook.filteredResumo}
         loading={hook.loading}
+        hasActiveFilters={hook.hasActiveFilters}
       />
 
       <CaixaFilters
@@ -46,6 +51,8 @@ export default function Caixa() {
         setDraftFiltro={hook.setDraftFiltro}
         draftComboboxOpen={hook.draftComboboxOpen}
         setDraftComboboxOpen={hook.setDraftComboboxOpen}
+        draftPeriodo={hook.draftPeriodo}
+        setDraftPeriodo={hook.setDraftPeriodo}
         draftDateRange={hook.draftDateRange}
         setDraftDateRange={hook.setDraftDateRange}
         draftProdutoSelecionado={hook.draftProdutoSelecionado}
@@ -54,6 +61,7 @@ export default function Caixa() {
         hasActiveFilters={hook.hasActiveFilters}
         appliedTipo={hook.appliedTipo}
         appliedProdutoId={hook.appliedProdutoId}
+        appliedPeriodo={hook.appliedPeriodo}
         appliedDateRange={hook.appliedDateRange}
         produtos={hook.produtos}
         applyFilters={hook.applyFilters}
@@ -79,10 +87,7 @@ export default function Caixa() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         produtos={hook.produtos}
-        onSuccess={() => {
-          hook.fetchResumo();
-          hook.fetchMovimentacoes(1);
-        }}
+        onSuccess={() => hook.fetchMovimentacoes(1)}
       />
     </div>
   );

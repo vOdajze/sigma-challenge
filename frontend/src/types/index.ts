@@ -45,6 +45,12 @@ export interface PaginatedResponse<T> {
   pages: number;
 }
 
+export interface MovimentacoesPaginatedResponse extends PaginatedResponse<Movimentacao> {
+  total_entradas: number;
+  total_saidas: number;
+  saldo: number;
+}
+
 export interface PontoResponse {
   id: string;
   latitude: number;

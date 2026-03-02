@@ -3,18 +3,26 @@ import { toast } from "sonner";
 import type { DateRange } from "react-day-picker";
 import api from "@/services/api";
 import type {
-  Movimentacao,
   CaixaResumo,
   Produto,
   PaginatedResponse,
+  MovimentacoesPaginatedResponse,
 } from "@/types";
 import { formatAPIDate } from "@/lib/formatters";
+import {
+  type PeriodoPreset,
+  getDateRangeForPeriodo,
+} from "@/lib/period-presets";
 
 export const PAGE_SIZE = 10;
 
 export function useCaixaPage() {
-  const [resumo, setResumo] = useState<CaixaResumo | null>(null);
-  const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([]);
+  const [filteredResumo, setFilteredResumo] = useState<CaixaResumo | null>(
+    null,
+  );
+  const [movimentacoes, setMovimentacoes] = useState<
+    MovimentacoesPaginatedResponse["items"]
+  >([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -28,10 +36,15 @@ export function useCaixaPage() {
   const [draftFiltro, setDraftFiltro] = useState("");
   const [draftComboboxOpen, setDraftComboboxOpen] = useState(false);
   const [draftTipo, setDraftTipo] = useState("");
-  const [draftDateRange, setDraftDateRange] = useState<DateRange | undefined>();
+  const [draftPeriodo, setDraftPeriodo] = useState<PeriodoPreset>("este_mes");
+  const [draftDateRange, setDraftDateRange] = useState<DateRange | undefined>(
+    () => getDateRangeForPeriodo("este_mes"),
+  );
 
   const [appliedTipo, setAppliedTipo] = useState("");
   const [appliedProdutoId, setAppliedProdutoId] = useState("");
+  const [appliedPeriodo, setAppliedPeriodo] =
+    useState<PeriodoPreset>("este_mes");
   const [appliedDateRange, setAppliedDateRange] = useState<
     DateRange | undefined
   >();
@@ -49,21 +62,6 @@ export function useCaixaPage() {
     p.nome.toLowerCase().includes(draftFiltro.toLowerCase()),
   );
 
-  const fetchResumo = async () => {
-    try {
-      const { data } = await api.get("/caixa");
-      setResumo(
-        data.data ?? {
-          total_entradas: data.total_entradas ?? 0,
-          total_saidas: data.total_saidas ?? 0,
-          saldo: data.saldo ?? 0,
-        },
-      );
-    } catch {
-      toast.error("Erro ao carregar resumo do caixa");
-    }
-  };
-
   const fetchMovimentacoes = async (
     p = 1,
     tipo = appliedTipo,
@@ -78,16 +76,21 @@ export function useCaixaPage() {
       });
       if (tipo) params.set("tipo", tipo);
       if (produtoId) params.set("produto_id", produtoId);
-     if (dateRange?.from)
+      if (dateRange?.from)
         params.set("data_inicio", formatAPIDate(dateRange.from));
       if (dateRange?.to) params.set("data_fim", formatAPIDate(dateRange.to));
-      const { data } = await api.get<PaginatedResponse<Movimentacao>>(
+      const { data } = await api.get<MovimentacoesPaginatedResponse>(
         `/caixa/movimentacoes?${params}`,
       );
       setMovimentacoes(data.items);
       setTotalPages(data.pages);
       setTotalItems(data.total);
       setPage(data.page);
+      setFilteredResumo({
+        total_entradas: data.total_entradas,
+        total_saidas: data.total_saidas,
+        saldo: data.saldo,
+      });
     } catch {
       toast.error("Erro ao carregar movimentações");
     } finally {
@@ -107,16 +110,21 @@ export function useCaixaPage() {
   };
 
   useEffect(() => {
-    fetchResumo();
-    fetchMovimentacoes(1, "", "", undefined);
+    fetchMovimentacoes(1);
     fetchProdutos();
   }, []);
 
   const handlePopoverOpenChange = (open: boolean) => {
     if (open) {
+      const periodo = appliedPeriodo;
       setDraftTipo(appliedTipo);
       setDraftProdutoValue(appliedProdutoId || null);
-      setDraftDateRange(appliedDateRange);
+      setDraftPeriodo(periodo);
+      setDraftDateRange(
+        periodo !== "personalizado" ?
+          getDateRangeForPeriodo(periodo)
+        : appliedDateRange,
+      );
       setDraftFiltro("");
       setDraftComboboxOpen(false);
     }
@@ -128,6 +136,7 @@ export function useCaixaPage() {
     setAppliedTipo(draftTipo);
     setAppliedProdutoId(newProdutoId);
     setAppliedDateRange(draftDateRange);
+    setAppliedPeriodo(draftPeriodo);
     setPopoverOpen(false);
     fetchMovimentacoes(1, draftTipo, newProdutoId, draftDateRange);
   };
@@ -135,10 +144,12 @@ export function useCaixaPage() {
   const clearFilters = () => {
     setDraftTipo("");
     setDraftProdutoValue(null);
-    setDraftDateRange(undefined);
+    setDraftPeriodo("este_mes");
+    setDraftDateRange(getDateRangeForPeriodo("este_mes"));
     setAppliedTipo("");
     setAppliedProdutoId("");
     setAppliedDateRange(undefined);
+    setAppliedPeriodo("este_mes");
     fetchMovimentacoes(1, "", "", undefined);
   };
 
@@ -156,12 +167,12 @@ export function useCaixaPage() {
 
   const removeDates = () => {
     setAppliedDateRange(undefined);
-    setDraftDateRange(undefined);
+    setAppliedPeriodo("este_mes");
     fetchMovimentacoes(1, appliedTipo, appliedProdutoId, undefined);
   };
 
   return {
-    resumo,
+    filteredResumo,
     movimentacoes,
     produtos,
     loading,
@@ -177,16 +188,18 @@ export function useCaixaPage() {
     setDraftComboboxOpen,
     draftTipo,
     setDraftTipo,
+    draftPeriodo,
+    setDraftPeriodo,
     draftDateRange,
     setDraftDateRange,
     appliedTipo,
     appliedProdutoId,
+    appliedPeriodo,
     appliedDateRange,
     activeCount,
     hasActiveFilters,
     draftProdutoSelecionado,
     draftProdutosFiltrados,
-    fetchResumo,
     fetchMovimentacoes,
     handlePopoverOpenChange,
     applyFilters,
