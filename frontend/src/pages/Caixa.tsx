@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Wallet } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useCaixaPage } from "@/hooks/useCaixaPage";
 import { CaixaResumoCards } from "@/components/caixa/CaixaResumoCards";
 import { CaixaFilters } from "@/components/caixa/CaixaFilters";
@@ -15,10 +15,6 @@ export default function Caixa() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Wallet
-            size={22}
-            className="text-blue-600"
-          />
           <div>
             <h1 className="text-2xl font-semibold">Fluxo de Caixa</h1>
             <p className="text-sm text-muted-foreground">
