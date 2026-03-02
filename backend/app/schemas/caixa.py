@@ -22,6 +22,17 @@ class MovimentacaoResponse(BaseModel):
     data_movimentacao: datetime
 
 
+class MovimentacaoListResponse(BaseModel):
+    items: list[MovimentacaoResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+    total_entradas: float
+    total_saidas: float
+    saldo: float
+
+
 class CaixaResumoResponse(BaseModel):
     total_entradas: float
     total_saidas: float

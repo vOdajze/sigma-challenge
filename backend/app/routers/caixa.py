@@ -4,9 +4,9 @@ from app.core.database import get_db
 from app.dependencies.deps import get_current_user
 from app.schemas.caixa import (
     MovimentacaoCreate,
+    MovimentacaoListResponse,
     MovimentacaoResponse,
     CaixaResumoResponse,
-    MovimentacaoPaginatedResponse,
 )
 from app.services import caixa_service
 from datetime import date
@@ -37,7 +37,7 @@ def registrar_movimentacao(
 def resumo_caixa(db: Session = Depends(get_db), _=Depends(get_current_user)):
     return caixa_service.resumo_caixa(db)
 
-@router.get("/movimentacoes", response_model=MovimentacaoPaginatedResponse)
+@router.get("/movimentacoes", response_model=MovimentacaoListResponse) 
 def listar_movimentacoes(
     page: int = Query(default=1, ge=1),
     size: int = Query(default=20, ge=1, le=100),
