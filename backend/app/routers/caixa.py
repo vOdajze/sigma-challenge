@@ -6,7 +6,6 @@ from app.schemas.caixa import (
     MovimentacaoCreate,
     MovimentacaoListResponse,
     MovimentacaoResponse,
-    CaixaResumoResponse,
 )
 from app.services import caixa_service
 from datetime import date
@@ -32,10 +31,6 @@ def registrar_movimentacao(
 ):
     return caixa_service.registrar_movimentacao(db, data)
 
-
-@router.get("", response_model=CaixaResumoResponse)
-def resumo_caixa(db: Session = Depends(get_db), _=Depends(get_current_user)):
-    return caixa_service.resumo_caixa(db)
 
 @router.get("/movimentacoes", response_model=MovimentacaoListResponse) 
 def listar_movimentacoes(

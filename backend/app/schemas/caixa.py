@@ -33,12 +33,4 @@ class MovimentacaoListResponse(BaseModel):
     saldo: float
 
 
-class CaixaResumoResponse(BaseModel):
-    total_entradas: float
-    total_saidas: float
-    saldo: float
-    total: int
-    movimentacoes: list[MovimentacaoResponse]
-
-
 MovimentacaoPaginatedResponse = PaginatedResponse[MovimentacaoResponse]
