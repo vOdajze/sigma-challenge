@@ -2,7 +2,7 @@
 
 ## Especificação de Requisitos de Software — Desafio Sigma
 
-**Versão:** 1.2 · **Data:** 28 de fevereiro de 2026 · **Status:** Ativo
+**Versão:** 1.3 · **Data:** 02 de março de 2026 · **Status:** Ativo
 
 </div>
 
@@ -29,7 +29,6 @@ Desenvolvedor ou sistema externo que consome diretamente os endpoints REST da ap
 
 **Usuário da Interface**
 Usuário final que interage com a aplicação por meio do frontend web (React). Não precisa conhecer os detalhes da API subjacente. Realiza operações como cadastrar produtos, registrar movimentações de caixa e explorar dados geoespaciais por meio de formulários e mapas interativos.
-
 
 ---
 
@@ -122,7 +121,7 @@ Como **usuário da API** eu quero **buscar um produto específico pelo seu ID** 
 Como **usuário da API** eu quero **atualizar os dados de um produto existente** a fim de **manter as informações do inventário sempre corretas**.
 
 **Condições de satisfação:**
-- `PUT /produtos/{id}` aceita body JSON com os campos a serem atualizados;
+- `PATCH /produtos/{id}` aceita body JSON com os campos a serem atualizados;
 - Retorna o produto atualizado com status `200 OK`;
 - O campo `updated_at` é atualizado automaticamente;
 - Produto inexistente retorna status `404 Not Found`.
@@ -136,7 +135,7 @@ Como **usuário da API** eu quero **remover um produto do sistema** a fim de **m
 **Condições de satisfação:**
 - `DELETE /produtos/{id}` remove o produto e retorna status `204 No Content`;
 - Produto inexistente retorna status `404 Not Found`;
-- Ao deletar um produto, suas movimentações de caixa relacionadas devem ser tratadas (cascade ou bloqueio, definir na implementação).
+- Movimentações de caixa relacionadas ao produto são bloqueadas via `RESTRICT` no Foreign Key — não é possível deletar um produto que possua movimentações associadas.
 
 ---
 
@@ -162,8 +161,8 @@ Como **usuário da API** eu quero **registrar a entrada ou saída de um produto 
 Como **usuário da API** eu quero **visualizar o resumo do fluxo de caixa** a fim de **acompanhar o saldo consolidado de entradas e saídas**.
 
 **Condições de satisfação:**
-- `GET /caixa` retorna resumo com total de entradas, total de saídas e saldo atual;
-- Lista as movimentações registradas com `produto_id`, `quantidade`, `valor_total`, `tipo_movimentacao` e `data_movimentacao`;
+- `GET /caixa/movimentacoes` retorna em uma única resposta: `total_entradas`, `total_saidas`, `saldo`, `total` de registros e lista paginada de movimentações;
+- Cada movimentação contém `produto_id`, `quantidade`, `valor_total`, `tipo_movimentacao` e `data_movimentacao`;
 - Retorna status `200 OK` mesmo que não haja movimentações (saldo zerado).
 
 ---
@@ -177,7 +176,7 @@ Como **usuário da API** eu quero **visualizar o resumo do fluxo de caixa** a fi
 Como **usuário do sistema** eu quero **autenticar-me com usuário e senha** a fim de **obter acesso seguro às funcionalidades protegidas da aplicação**.
 
 **Condições de satisfação:**
-- `POST /login` aceita `username` e `password` no body;
+- `POST /login` aceita `identifier` e `password` no body;
 - Credenciais válidas retornam token JWT com informações de expiração e status `200 OK`;
 - Credenciais inválidas retornam status `401 Unauthorized`;
 - Token JWT deve ser enviado no header `Authorization: Bearer <token>` nas requisições subsequentes;
@@ -208,10 +207,10 @@ Como **usuário da API** eu quero **buscar a área total de um tipo de uso do so
 
 **Condições de satisfação:**
 - `GET /gis/usos-solo/{uso}` retorna a área total das geometrias correspondentes ao tipo informado;
-- Área retornada em m² ou km², com indicação da unidade no response JSON;
+- Área retornada em m² e km², com indicação da unidade no response JSON;
 - Tipo de uso inexistente retorna status `404 Not Found`;
 - Cálculo realizado via biblioteca geoespacial (GeoPandas ou Shapely);
-- Valor de área com precisão adequada (mínimo 2 casas decimais).
+- Valor de área com precisão mínima de 2 casas decimais.
 
 ---
 
@@ -284,7 +283,7 @@ Como **desenvolvedor** eu quero **containerizar o Frontend com Docker** a fim de
 **Condições de satisfação:**
 - `Dockerfile` na pasta `/frontend` instala dependências via `package.json` e realiza o build da aplicação;
 - Imagem de produção utiliza servidor estático (`nginx`) para servir os arquivos gerados pelo build;
-- Container expõe porta `80` (ou `3000` em modo desenvolvimento);
+- Container expõe porta `80`;
 - Variável de ambiente `VITE_API_URL` configurável via `.env` para apontar para o Back-End;
 - Arquivo `.env.example` documentado com todas as variáveis necessárias.
 
@@ -292,7 +291,7 @@ Como **desenvolvedor** eu quero **containerizar o Frontend com Docker** a fim de
 
 **SIGMA-013d** · 🔴 Alta
 
-Como **desenvolvedor** eu quero **orquestrar todos os servidores com Docker Compose** a fim de **subir o ambiente completo com um único comando (`docker-compose up --build`)**.
+Como **desenvolvedor** eu quero **orquestrar todos os servidores com Docker Compose** a fim de **subir o ambiente completo com um único comando (`docker compose up --build`)**.
 
 **Condições de satisfação:**
 - `docker-compose.yml` define os serviços `backend`, `db` e `frontend`;
@@ -373,7 +372,7 @@ Como **usuário da interface** eu quero **registrar pontos georreferenciados cli
 Como **usuário da interface** eu quero **autenticar-me por meio de uma tela de login** a fim de **acessar o sistema de forma segura quando a autenticação JWT estiver habilitada**.
 
 **Condições de satisfação:**
-- Tela de login com campos `username` e `password`;
+- Tela de login com campos `identifier` e `password`;
 - Token JWT recebido é armazenado no `localStorage` ou `sessionStorage`;
 - Todas as requisições à API incluem o header `Authorization: Bearer <token>` automaticamente;
 - Ao expirar o token, usuário é redirecionado para a tela de login;
@@ -394,25 +393,25 @@ Como **avaliador técnico** eu quero **importar uma Collection Postman completa*
 - Collection cobre todos os endpoints dos Módulos 1 ao 5;
 - Variáveis globais configuradas: `{{base_url}}`, `{{token}}` e `{{produto_id}}`;
 - Script de autenticação salva token automaticamente no ambiente após `POST /login`;
-- `postman_environment.json` incluído (opcional);
+- `postman_environment.json` incluído na pasta `/postman`;
 - `README.md` contém instruções de importação e a sequência de execução abaixo.
 
 **Sequência de execução sugerida:**
 
-| Ordem | Endpoint | Descrição |
-|---|---|---|
-| 1 | `POST /login` | Obter e salvar token JWT |
-| 2 | `POST /produtos` | Criar produto de teste |
-| 3 | `GET /produtos` | Listar todos os produtos |
-| 4 | `GET /produtos/{id}` | Buscar produto criado |
-| 5 | `POST /caixa/movimentacao` | Registrar movimento de entrada |
-| 6 | `GET /caixa` | Visualizar resumo do caixa |
-| 7 | `PUT /produtos/{id}` | Atualizar produto |
-| 8 | `GET /gis/usos-solo` | Listar usos do solo |
-| 9 | `GET /gis/usos-solo/{uso}` | Buscar área de um uso |
-| 10 | `POST /gis/pontos` | Criar ponto georreferenciado |
-| 11 | `GET /gis/pontos` | Listar pontos |
-| 12 | `DELETE /produtos/{id}` | Deletar produto de teste |
+| Ordem | Método | Endpoint | Descrição |
+|---|---|---|---|
+| 1 | `POST` | `/login` | Obter e salvar token JWT |
+| 2 | `POST` | `/produtos` | Criar produto de teste |
+| 3 | `GET` | `/produtos` | Listar todos os produtos |
+| 4 | `GET` | `/produtos/{id}` | Buscar produto criado |
+| 5 | `PATCH` | `/produtos/{id}` | Atualizar produto |
+| 6 | `POST` | `/caixa/movimentacao` | Registrar movimento de entrada |
+| 7 | `GET` | `/caixa/movimentacoes` | Listar movimentações com totais e saldo |
+| 8 | `GET` | `/gis/usos-solo` | Listar usos do solo |
+| 9 | `GET` | `/gis/usos-solo/{uso}` | Buscar área de um uso |
+| 10 | `POST` | `/gis/pontos` | Criar ponto georreferenciado |
+| 11 | `GET` | `/gis/pontos` | Listar pontos |
+| 12 | `DELETE` | `/produtos/{id}` | Deletar produto de teste |
 
 ---
 
@@ -425,7 +424,7 @@ O sistema deve responder a requisições de leitura simples (listagens e buscas 
 O sistema deve garantir que nenhum dado seja perdido em caso de reinicialização dos containers, utilizando volumes Docker persistentes para o banco de dados PostgreSQL.
 
 **RNF-003 — Reprodutibilidade de ambiente**
-O sistema deve poder ser iniciado completamente em qualquer máquina com Docker e Docker Compose instalados, executando apenas o comando `docker-compose up --build`, sem configurações manuais adicionais além das variáveis de ambiente documentadas no `.env.example`.
+O sistema deve poder ser iniciado completamente em qualquer máquina com Docker e Docker Compose instalados, executando apenas o comando `docker compose up --build`, sem configurações manuais adicionais além das variáveis de ambiente documentadas no `.env.example`.
 
 **RNF-004 — Segurança de entrada**
 O sistema deve validar e sanitizar todas as entradas de usuário em todos os endpoints, retornando mensagens de erro descritivas e status HTTP adequados para entradas inválidas.
@@ -452,17 +451,15 @@ O sistema deve conter um `README.md` na raiz do repositório com instruções co
 
 ### 5. Rastreabilidade de Requisitos
 
-A tabela abaixo registra todos os requisitos funcionais do sistema com seus identificadores, módulos e prioridades, servindo como referência para rastreabilidade entre estórias, implementação e testes.
-
 | ID | Estória | Módulo | Prioridade |
 |---|---|---|---|
 | SIGMA-001 | Cadastrar produto | CRUD Produtos | 🔴 Alta |
 | SIGMA-002 | Listar produtos | CRUD Produtos | 🔴 Alta |
 | SIGMA-003 | Buscar produto por ID | CRUD Produtos | 🔴 Alta |
-| SIGMA-004 | Atualizar produto | CRUD Produtos | 🔴 Alta |
+| SIGMA-004 | Atualizar produto (`PATCH`) | CRUD Produtos | 🔴 Alta |
 | SIGMA-005 | Remover produto | CRUD Produtos | 🔴 Alta |
 | SIGMA-006 | Registrar movimentação de caixa | Fluxo de Caixa | 🔴 Alta |
-| SIGMA-007 | Visualizar resumo do caixa | Fluxo de Caixa | 🔴 Alta |
+| SIGMA-007 | Listar movimentações com totais e saldo | Fluxo de Caixa | 🔴 Alta |
 | SIGMA-008 | Autenticação JWT | Autenticação | 🟢 Baixa |
 | SIGMA-009 | Listar usos do solo | GIS | 🔴 Alta |
 | SIGMA-010 | Buscar área por uso do solo | GIS | 🔴 Alta |
@@ -488,5 +485,3 @@ A tabela abaixo registra todos os requisitos funcionais do sistema com seus iden
 | RNF-008 | Precisão de cálculo GIS | Não-Funcional | 🔴 Alta |
 | RNF-009 | Versionamento Git | Não-Funcional | 🔴 Alta |
 | RNF-010 | Documentação README | Não-Funcional | 🔴 Alta |
-
----
