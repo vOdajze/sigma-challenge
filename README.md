@@ -24,7 +24,7 @@ API REST desenvolvida em **FastAPI + PostgreSQL** com frontend em **React + Vite
 ### 1. Clonar o repositório
 
 ```bash
-git clone [<url-do-repositorio>](https://github.com/vOdajze/sigma-challenge.git)
+git clone https://github.com/vOdajze/sigma-challenge.git
 cd sigma-challenge
 ```
 
@@ -220,4 +220,5 @@ docker exec sigma-backend alembic upgrade head
 # Reconstruir apenas o backend
 docker compose up --build backend
 ```
+
 
