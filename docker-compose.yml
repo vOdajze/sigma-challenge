@@ -2,6 +2,8 @@ services:
   db:
     image: postgres:16-alpine
     container_name: sigma-db
+    env_file:
+      - .env 
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -22,7 +24,7 @@ services:
       dockerfile: Dockerfile
     container_name: sigma-backend
     env_file:
-      - ./backend/.env
+      - .env 
     environment:
       DB_HOST: db
     ports:
@@ -38,7 +40,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: http://localhost:8000
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
     container_name: sigma-frontend
     ports:
       - "80:80"
