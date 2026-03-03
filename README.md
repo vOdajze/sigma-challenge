@@ -11,6 +11,7 @@ API REST desenvolvida em **FastAPI + PostgreSQL** com frontend em **React + Vite
 **Infraestrutura:** Docker · Docker Compose · Nginx
 
 ---
+
 ## Pré-requisitos
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e **rodando**
@@ -43,15 +44,13 @@ python setup.py
 docker compose up --build
 ```
 
-> Na primeira execução pode levar 3–5 minutos (download de imagens + build).
-
 ### 4. Acessar a aplicação
 
-| Serviço        | URL                                                          |
-|----------------|--------------------------------------------------------------|
-| Frontend       | [http://localhost](http://localhost)                         |
-| API (Swagger)  | [http://localhost:8000/docs](http://localhost:8000/docs)     |
-| API (ReDoc)    | [http://localhost:8000/redoc](http://localhost:8000/redoc)   |
+| Serviço       | URL                                                        |
+|---------------|------------------------------------------------------------|
+| Frontend      | [http://localhost](http://localhost)                       |
+| API (Swagger) | [http://localhost:8000/docs](http://localhost:8000/docs)   |
+| API (ReDoc)   | [http://localhost:8000/redoc](http://localhost:8000/redoc) |
 
 ---
 
@@ -61,10 +60,10 @@ O banco é populado automaticamente ao subir pela primeira vez com dados de exem
 
 **Usuários disponíveis:**
 
-| Username   | Senha       | Perfil        |
-|------------|-------------|---------------|
-| admin      | Admin@123   | Administrador |
-| avaliador  | Avalia@123  | Avaliador     |
+| Username  | Senha      | Perfil        |
+|-----------|------------|---------------|
+| admin     | Admin@123  | Administrador |
+| avaliador | Avalia@123 | Avaliador     |
 
 **Produtos pré-cadastrados:** 15 serviços agrícolas com movimentações de caixa e estoques já calculados, com datas distribuídas ao longo do ano corrente.
 
@@ -137,64 +136,81 @@ npm run dev
 ## Endpoints Principais
 
 > Todas as rotas (exceto `/login` e `/register`) exigem autenticação via JWT.  
-> No Swagger, clique em **Authorize 🔒** e insira o `access_token` retornado no login.
+> No Swagger, clique em **Authorize** e insira o `access_token` retornado no login.
 
 ### Autenticação
 
-| Método | Rota        | Descrição                  |
-|--------|-------------|----------------------------|
-| POST   | /register   | Criar usuário              |
-| POST   | /login      | Login (retorna JWT)        |
-| POST   | /logout     | Logout                     |
-| GET    | /me         | Dados do usuário logado    |
+| Método | Rota      | Descrição               |
+|--------|-----------|-------------------------|
+| POST   | /register | Criar usuário           |
+| POST   | /login    | Login (retorna JWT)     |
+| POST   | /logout   | Logout                  |
+| GET    | /me       | Dados do usuário logado |
 
 ### Produtos
 
-| Método | Rota             | Descrição              |
-|--------|------------------|------------------------|
-| GET    | /produtos        | Listar com paginação e filtros |
-| POST   | /produtos        | Criar produto          |
-| GET    | /produtos/{id}   | Buscar por ID          |
-| PATCH   | /produtos/{id}   | Atualizar produto      |
-| DELETE | /produtos/{id}   | Remover produto        |
+| Método | Rota           | Descrição                      |
+|--------|----------------|--------------------------------|
+| GET    | /produtos      | Listar com paginação e filtros |
+| POST   | /produtos      | Criar produto                  |
+| GET    | /produtos/{id} | Buscar por ID                  |
+| PATCH  | /produtos/{id} | Atualizar produto              |
+| DELETE | /produtos/{id} | Remover produto                |
 
 ### Fluxo de Caixa
 
-| Método | Rota                    | Descrição                      |
-|--------|-------------------------|--------------------------------|
-| POST   | /caixa/movimentacoes    | Registrar entrada ou saída     |
-| GET    | /caixa/movimentacoes    | Listar com filtros e totais    |
-| GET    | /caixa/resumo           | Resumo financeiro geral        |
+| Método | Rota                 | Descrição                              |
+|--------|----------------------|----------------------------------------|
+| POST   | /caixa/movimentacao  | Registrar entrada ou saída             |
+| GET    | /caixa/movimentacoes | Listar movimentações com totais e saldo |
 
 ### GIS
 
-| Método | Rota                       | Descrição                        |
-|--------|----------------------------|----------------------------------|
-| GET    | /gis/usos-solo             | Listar usos do solo disponíveis  |
-| POST   | /gis/pontos-amostragem     | Criar ponto de amostragem        |
-| GET    | /gis/pontos-amostragem     | Listar pontos cadastrados        |
+| Método | Rota                   | Descrição                       |
+|--------|------------------------|---------------------------------|
+| GET    | /gis/usos-solo         | Listar usos do solo disponíveis |
+| GET    | /gis/usos-solo/{uso}   | Buscar área de um uso do solo   |
+| POST   | /gis/pontos            | Criar ponto georreferenciado    |
+| GET    | /gis/pontos            | Listar pontos cadastrados       |
 
 ---
 
-## Variáveis de Ambiente
+## Testes com Postman
 
-| Variável                       | Descrição                    | Padrão                                           |
-|--------------------------------|------------------------------|--------------------------------------------------|
-| DB_HOST                        | Host do PostgreSQL           | db                                               |
-| DB_PORT                        | Porta do PostgreSQL          | 5432                                             |
-| DB_NAME                        | Nome do banco                | sigma_db                                         |
-| DB_USER                        | Usuário do banco             | sigma_user                                       |
-| DB_PASSWORD                    | Senha do banco               | gerada pelo setup.py                             |
-| APP_ENV                        | Ambiente da aplicação        | development                                      |
-| APP_HOST                       | Host do servidor             | 0.0.0.0                                          |
-| APP_PORT                       | Porta do servidor            | 8000                                             |
-| SECRET_KEY                     | Chave JWT                    | gerada pelo setup.py                             |
-| ALGORITHM                      | Algoritmo JWT                | HS256                                            |
-| ACCESS_TOKEN_EXPIRE_MINUTES    | Expiração do token           | 30                                               |
-| ENABLE_AUTH                    | Ativar autenticação          | True                                             |
-| CORS_ORIGINS                   | Origens permitidas           | `["http://localhost","http://localhost:5173"]`   |
-| GEOJSON_PATH                   | Caminho do GeoJSON           | data/uso_ocupacao_teste.geojson                  |
-| VITE_API_URL                   | URL da API no frontend       | http://localhost:8000                            |
+Os arquivos da collection e do environment estão disponíveis na pasta `/postman` do repositório:
+
+```
+postman/
+├── postman_collection.json
+└── postman_environment.json
+```
+
+### Como importar
+
+1. Abra o Postman
+2. Clique em **File → Import**
+3. Arraste os dois arquivos da pasta `/postman` de uma vez
+4. No canto superior direito, selecione o environment **"Sigma Challenge"** no dropdown
+
+### Sequência sugerida de execução
+
+| Ordem | Método | Endpoint                  | Descrição                                    |
+|-------|--------|---------------------------|----------------------------------------------|
+| 1     | POST   | /login                    | Obtém e salva `{{token}}` automaticamente    |
+| 2     | POST   | /produtos                 | Cria produto e salva `{{produto_id}}`        |
+| 3     | GET    | /produtos                 | Lista todos os produtos                      |
+| 4     | GET    | /produtos/{{produto_id}}  | Busca o produto criado                       |
+| 5     | PATCH  | /produtos/{{produto_id}}  | Atualiza o produto                           |
+| 6     | POST   | /caixa/movimentacao       | Registra movimentação de entrada             |
+| 7     | GET    | /caixa/movimentacoes      | Lista movimentações com totais e saldo       |
+| 8     | GET    | /gis/usos-solo            | Lista usos do solo disponíveis               |
+| 9     | GET    | /gis/usos-solo/PRÓPRIAS   | Busca área de um uso específico              |
+| 10    | POST   | /gis/pontos               | Cria ponto georreferenciado                  |
+| 11    | GET    | /gis/pontos               | Lista pontos cadastrados                     |
+| 12    | DELETE | /produtos/{{produto_id}}  | Remove o produto de teste                    |
+*Obs: Caso o produto tenha movimentções, não será permitido o delete.
+> As variáveis `{{token}}` e `{{produto_id}}` são preenchidas automaticamente pelos scripts da collection — nenhuma configuração manual é necessária.
+
 
 ---
 
@@ -220,6 +236,7 @@ docker exec sigma-backend alembic upgrade head
 # Reconstruir apenas o backend
 docker compose up --build backend
 ```
+
 
 
 
