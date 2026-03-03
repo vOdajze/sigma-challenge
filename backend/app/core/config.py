@@ -1,9 +1,16 @@
 import json
-from pydantic import field_validator
-from pydantic_settings import BaseSettings
+from pydantic import field_validator, computed_field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file="../.env",
+        env_file_encoding="utf-8",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+
     DB_HOST: str
     DB_PORT: int = 5432
     DB_NAME: str
@@ -18,12 +25,12 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:80"]
+
+    CORS_ORIGINS: list[str] = ["http://localhost", "http://localhost:5173"]
 
     GEOJSON_PATH: str = "data/uso_ocupacao_teste.geojson"
 
-   
+    @computed_field
     @property
     def DATABASE_URL(self) -> str:
         return (
@@ -35,12 +42,11 @@ class Settings(BaseSettings):
     @classmethod
     def parse_cors(cls, v):
         if isinstance(v, str):
-            return json.loads(v)
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return [i.strip() for i in v.split(",") if i.strip()]
         return v
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
 
 
 settings = Settings()
