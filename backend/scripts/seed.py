@@ -23,7 +23,7 @@ def seed(db: Session) -> None:
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday = today - timedelta(days=1)
     start_of_year = datetime(today.year, 1, 1)
-
+    meio_do_range = start_of_year + (yesterday - start_of_year) / 2
     if not db.query(Usuario).first():
         usuarios = [
             Usuario(
