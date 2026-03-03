@@ -1,0 +1,529 @@
+{
+  "info": {
+    "_postman_id": "f61182f5-6afa-4cef-a69e-88f91f26ec78",
+    "name": "Sigma Challenge API",
+    "description": "Collection completa para testar todos os endpoints da API Sigma Challenge.\n\nExecute as requests na ordem listada para que as variáveis de ambiente sejam preenchidas automaticamente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Autenticação",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"admin\",\n  \"password\": \"Admin@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.environment.set('token', res.access_token);",
+                  "pm.test('Login OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Token recebido', () => pm.expect(res.access_token).to.be.a('string'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Produtos",
+      "item": [
+        {
+          "name": "Cadastrar Produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/produtos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Produto Teste Postman\",\n  \"descricao\": \"Criado via collection Postman\",\n  \"preco\": 9999.99\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.environment.set('produto_id', String(res.id));",
+                  "pm.test('Produto criado', () => pm.response.to.have.status(201));",
+                  "pm.test('ID gerado', () => pm.expect(res.id).to.exist);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar Produtos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/produtos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar Produto por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/produtos/{{produto_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos",
+                "{{produto_id}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('ID correto', () => pm.expect(String(pm.response.json().id)).to.eql(pm.environment.get('produto_id')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar Produto",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/produtos/{{produto_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos",
+                "{{produto_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Produto Atualizado\",\n  \"descricao\": \"Descri\\u00e7\\u00e3o atualizada via Postman\",\n  \"preco\": 12345.67\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Nome atualizado', () => pm.expect(pm.response.json().nome).to.eql('Produto Atualizado'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Fluxo de Caixa",
+      "item": [
+        {
+          "name": "Registrar Movimentação de Caixa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/caixa/movimentacao",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "caixa",
+                "movimentacao"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"produto_id\": \"{{produto_id}}\",\n  \"quantidade\": 5,\n  \"valor_unitario\": 12345.67,\n  \"tipo_movimentacao\": \"entrada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Movimentação criada', () => pm.response.to.have.status(201));",
+                  "pm.test('Valor total calculado', () => pm.expect(pm.response.json().valor_total).to.exist);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar Movimentações e Resumo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/caixa/movimentacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "caixa",
+                "movimentacoes"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.test('Contém saldo', () => pm.expect(res).to.have.property('saldo'));",
+                  "pm.test('Contém total_entradas', () => pm.expect(res).to.have.property('total_entradas'));",
+                  "pm.test('Contém total_saidas', () => pm.expect(res).to.have.property('total_saidas'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. GIS",
+      "item": [
+        {
+          "name": "Listar Usos do Solo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gis/usos-solo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gis",
+                "usos-solo"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Área por Uso do Solo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gis/usos-solo/PRÓPRIAS",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gis",
+                "usos-solo",
+                "PRÓPRIAS"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Contém área', () => pm.expect(pm.response.json()).to.have.property('area_m2'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar Ponto Georreferenciado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gis/pontos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gis",
+                "pontos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -20.487648,\n  \"longitude\": -49.538212\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Ponto criado', () => pm.response.to.have.status(201));",
+                  "pm.test('Uso do solo identificado', () => pm.expect(pm.response.json().desc_uso_solo).to.exist);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar Pontos Georreferenciados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gis/pontos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gis",
+                "pontos"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Limpeza",
+      "item": [
+        {
+          "name": "Deletar Produto",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/produtos/{{produto_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos",
+                "{{produto_id}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Produto deletado', () => pm.response.to.have.status(204));",
+                  "pm.environment.unset('produto_id');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
