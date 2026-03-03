@@ -155,7 +155,7 @@ npm run dev
 | GET    | /produtos        | Listar com paginação e filtros |
 | POST   | /produtos        | Criar produto          |
 | GET    | /produtos/{id}   | Buscar por ID          |
-| PUT    | /produtos/{id}   | Atualizar produto      |
+| PATCH   | /produtos/{id}   | Atualizar produto      |
 | DELETE | /produtos/{id}   | Remover produto        |
 
 ### Fluxo de Caixa
@@ -220,5 +220,6 @@ docker exec sigma-backend alembic upgrade head
 # Reconstruir apenas o backend
 docker compose up --build backend
 ```
+
 
 
