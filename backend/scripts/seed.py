@@ -9,16 +9,33 @@ from app.models.usuario import Usuario
 from app.models.produto import Produto
 from app.models.movimentacao import MovimentacaoCaixa, TipoMovimentacao
 from decimal import Decimal
+from datetime import datetime, timedelta
+import random
+
+
+def random_date(start: datetime, end: datetime) -> datetime:
+    delta = end - start
+    random_seconds = random.randint(0, int(delta.total_seconds()))
+    return start + timedelta(seconds=random_seconds)
 
 
 def seed(db: Session) -> None:
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday = today - timedelta(days=1)
+    start_of_year = datetime(today.year, 1, 1)
+
     if not db.query(Usuario).first():
         usuarios = [
             Usuario(
                 username="admin",
                 hashed_password=hash_password("Admin@123"),
                 email="admin@sigma.com",
-            )
+            ),
+            Usuario(
+                username="avaliador",
+                hashed_password=hash_password("Avalia@123"),
+                email="avaliador@sigma.com",
+            ),
         ]
         db.add_all(usuarios)
         db.flush()
@@ -49,14 +66,21 @@ def seed(db: Session) -> None:
             Produto(nome="Projeto de Sustentabilidade B2B", descricao="Plano de descarbonização e monitoramento", preco=Decimal("120000.00"), quantidade_estoque=0),
         ]
         db.add_all(produtos)
-        db.flush() 
+        db.flush()
         print("15 Produtos/Serviços criados pelo seed")
 
         movimentacoes = []
         
         for produto in produtos:
+            data_entrada = random_date(start_of_year, meio_do_range)
             movimentacoes.append(
-                MovimentacaoCaixa(produto_id=produto.id, quantidade=10, valor_unitario=produto.preco, tipo_movimentacao=TipoMovimentacao.entrada)
+                MovimentacaoCaixa(
+                    produto_id=produto.id,
+                    quantidade=10,
+                    valor_unitario=produto.preco,
+                    tipo_movimentacao=TipoMovimentacao.entrada,
+                    data_movimentacao=data_entrada,
+                )
             )
         
         saidas = [
@@ -71,8 +95,15 @@ def seed(db: Session) -> None:
 
         for index_produto, qtd_vendida in saidas:
             produto = produtos[index_produto]
+            data_saida = random_date(meio_do_range, yesterday)
             movimentacoes.append(
-                MovimentacaoCaixa(produto_id=produto.id, quantidade=qtd_vendida, valor_unitario=produto.preco, tipo_movimentacao=TipoMovimentacao.saida)
+                MovimentacaoCaixa(
+                    produto_id=produto.id,
+                    quantidade=qtd_vendida,
+                    valor_unitario=produto.preco,
+                    tipo_movimentacao=TipoMovimentacao.saida,
+                    data_movimentacao=data_saida,
+                )
             )
 
         db.add_all(movimentacoes)
