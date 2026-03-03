@@ -208,7 +208,8 @@ postman/
 | 10    | POST   | /gis/pontos               | Cria ponto georreferenciado                  |
 | 11    | GET    | /gis/pontos               | Lista pontos cadastrados                     |
 | 12    | DELETE | /produtos/{{produto_id}}  | Remove o produto de teste                    |
-*Obs: Caso o produto tenha movimentções, não será permitido o delete.
+
+> **Obs:** Caso o produto tenha movimentções, não será permitido o delete. <br>
 > As variáveis `{{token}}` e `{{produto_id}}` são preenchidas automaticamente pelos scripts da collection — nenhuma configuração manual é necessária.
 
 
@@ -236,6 +237,7 @@ docker exec sigma-backend alembic upgrade head
 # Reconstruir apenas o backend
 docker compose up --build backend
 ```
+
 
 
 
