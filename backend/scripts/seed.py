@@ -20,10 +20,11 @@ def random_date(start: datetime, end: datetime) -> datetime:
 
 
 def seed(db: Session) -> None:
-    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    yesterday = today - timedelta(days=1)
+    today         = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday     = today - timedelta(days=1)
     start_of_year = datetime(today.year, 1, 1)
     meio_do_range = start_of_year + (yesterday - start_of_year) / 2
+
     if not db.query(Usuario).first():
         usuarios = [
             Usuario(
@@ -45,24 +46,24 @@ def seed(db: Session) -> None:
         produtos = [
             Produto(nome="Tomografia do Canavial", descricao="Monitoramento via Satélite (Pacote 10.000 ha)", preco=Decimal("15000.00"), quantidade_estoque=0),
             Produto(nome="Monitoramento de Produção Agrícola", descricao="Acompanhamento de safra contínuo", preco=Decimal("25000.00"), quantidade_estoque=0),
-            
+
             Produto(nome="Valuation Agrícola - Crédito", descricao="Laudo para finalidade de crédito bancário", preco=Decimal("35000.00"), quantidade_estoque=0),
             Produto(nome="Valuation Agrícola - Fusões", descricao="Avaliação de Usinas para Fusões e Aquisições (M&A)", preco=Decimal("85000.00"), quantidade_estoque=0),
-            
+
             Produto(nome="Relatório de Monitoramento - Cana", descricao="Produção Centro-Sul via Satélite", preco=Decimal("12000.00"), quantidade_estoque=0),
             Produto(nome="Dashboard Trading Analytics", descricao="Acesso à plataforma de dados Centro-Sul", preco=Decimal("8000.00"), quantidade_estoque=0),
-            
+
             Produto(nome="Mapeamento de Grãos via Satélite", descricao="Análise de Soja/Milho (Pacote 5.000 ha)", preco=Decimal("9500.00"), quantidade_estoque=0),
             Produto(nome="Mapeamento de Eucalipto via Satélite", descricao="Inventário florestal e monitoramento", preco=Decimal("11000.00"), quantidade_estoque=0),
-            
+
             Produto(nome="Estudo Ambiental Completo", descricao="EIA/RIMA para propriedades rurais", preco=Decimal("45000.00"), quantidade_estoque=0),
             Produto(nome="Due Diligence Ambiental", descricao="Auditoria de passivos ambientais", preco=Decimal("28000.00"), quantidade_estoque=0),
             Produto(nome="Consultoria RenovaBio", descricao="Assessoria completa para emissão de CBIOs", preco=Decimal("55000.00"), quantidade_estoque=0),
             Produto(nome="Consultoria Certificação Bonsucro", descricao="Adequação aos padrões internacionais", preco=Decimal("60000.00"), quantidade_estoque=0),
-            
+
             Produto(nome="Avaliação de Imóvel Rural", descricao="Laudo completo para investidores", preco=Decimal("22000.00"), quantidade_estoque=0),
             Produto(nome="Análise de Ativo Biológico", descricao="Mensuração de valor justo do canavial", preco=Decimal("30000.00"), quantidade_estoque=0),
-            
+
             Produto(nome="Projeto de Sustentabilidade B2B", descricao="Plano de descarbonização e monitoramento", preco=Decimal("120000.00"), quantidade_estoque=0),
         ]
         db.add_all(produtos)
@@ -70,7 +71,7 @@ def seed(db: Session) -> None:
         print("15 Produtos/Serviços criados pelo seed")
 
         movimentacoes = []
-        
+
         for produto in produtos:
             data_entrada = random_date(start_of_year, meio_do_range)
             movimentacoes.append(
@@ -82,15 +83,15 @@ def seed(db: Session) -> None:
                     data_movimentacao=data_entrada,
                 )
             )
-        
+
         saidas = [
-            (0, 3),  # 3 Tomografias vendidas
-            (2, 5),  # 5 Valuations para crédito vendidos
-            (3, 1),  # 1 Valuation para M&A
-            (4, 8),  # 8 Relatórios de Trading
-            (10, 2), # 2 Consultorias RenovaBio
-            (12, 4), # 4 Avaliações de Imóveis Rurais
-            (14, 1)  # 1 Projeto para Multinacional
+            (0, 3),   # 3 Tomografias vendidas
+            (2, 5),   # 5 Valuations para crédito vendidos
+            (3, 1),   # 1 Valuation para M&A
+            (4, 8),   # 8 Relatórios de Trading
+            (10, 2),  # 2 Consultorias RenovaBio
+            (12, 4),  # 4 Avaliações de Imóveis Rurais
+            (14, 1),  # 1 Projeto para Multinacional
         ]
 
         for index_produto, qtd_vendida in saidas:
@@ -106,18 +107,58 @@ def seed(db: Session) -> None:
                 )
             )
 
+        ontem_manha = yesterday.replace(hour=9,  minute=0,  second=0)
+        ontem_tarde = yesterday.replace(hour=14, minute=30, second=0)
+
+        movimentacoes += [
+            MovimentacaoCaixa(
+                produto_id=produtos[1].id,
+                quantidade=2,
+                valor_unitario=produtos[1].preco,
+                tipo_movimentacao=TipoMovimentacao.entrada,
+                data_movimentacao=ontem_manha,
+            ),
+            MovimentacaoCaixa(
+                produto_id=produtos[5].id,
+                quantidade=3,
+                valor_unitario=produtos[5].preco,
+                tipo_movimentacao=TipoMovimentacao.saida,
+                data_movimentacao=ontem_tarde,
+            ),
+        ]
+
+        hoje_manha = today.replace(hour=8,  minute=0,  second=0)
+        hoje_tarde = today.replace(hour=15, minute=0,  second=0)
+
+        movimentacoes += [
+            MovimentacaoCaixa(
+                produto_id=produtos[0].id,
+                quantidade=1,
+                valor_unitario=produtos[0].preco,
+                tipo_movimentacao=TipoMovimentacao.entrada,
+                data_movimentacao=hoje_manha,
+            ),
+            MovimentacaoCaixa(
+                produto_id=produtos[3].id,
+                quantidade=1,
+                valor_unitario=produtos[3].preco,
+                tipo_movimentacao=TipoMovimentacao.saida,
+                data_movimentacao=hoje_tarde,
+            ),
+        ]
+
         db.add_all(movimentacoes)
         db.flush()
         print("Movimentações de caixa criadas")
 
         estoques_calculados = {p.id: 0 for p in produtos}
-        
+
         for mov in movimentacoes:
             if mov.tipo_movimentacao == TipoMovimentacao.entrada:
                 estoques_calculados[mov.produto_id] += mov.quantidade
             elif mov.tipo_movimentacao == TipoMovimentacao.saida:
                 estoques_calculados[mov.produto_id] -= mov.quantidade
-        
+
         for produto in produtos:
             produto.quantidade_estoque = estoques_calculados[produto.id]
 
