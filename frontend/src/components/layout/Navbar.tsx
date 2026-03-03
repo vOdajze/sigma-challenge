@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Map, Package, Wallet, LogOut, UserRound } from "lucide-react";
+import { Map, Package, Wallet, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
